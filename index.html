@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MarketStructureLab — TradingView Indicators</title>
+  <meta name="description" content="Professional TradingView indicators for market structure, liquidity, and volume analysis. Join the waitlist.">
+  <meta property="og:title" content="MarketStructureLab">
+  <meta property="og:description" content="Professional TradingView indicators for market structure analysis.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a0a;
+      --bull-green: #00C853;
+      --glow-green: #00E676;
+      --text-white: #FFFFFF;
+      --text-gray: #9E9E9E;
+      --font: 'Montserrat', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text-white);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ===== PARTICLES ===== */
+    .particles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: var(--bull-green);
+      opacity: 0;
+      animation: float linear infinite;
+    }
+    @keyframes float {
+      0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+      10%  { opacity: var(--p-opacity); }
+      90%  { opacity: var(--p-opacity); }
+      100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      position: relative;
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem 1.5rem;
+      background: radial-gradient(circle at 50% 50%, rgba(0,200,83,0.09) 0%, transparent 60%);
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(0,200,83,0.03) 3px,
+        rgba(0,200,83,0.03) 4px
+      );
+      pointer-events: none;
+    }
+
+    .brand {
+      font-size: clamp(2rem, 7vw, 4rem);
+      font-weight: 900;
+      letter-spacing: -1px;
+      animation: glowPulse 3s ease-in-out infinite;
+      position: relative;
+      z-index: 1;
+    }
+    @keyframes glowPulse {
+      0%, 100% { text-shadow: 0 0 30px rgba(0,200,83,0.4), 0 0 60px rgba(0,200,83,0.13); }
+      50%      { text-shadow: 0 0 50px rgba(0,200,83,0.67), 0 0 100px rgba(0,200,83,0.27); }
+    }
+
+    .tagline {
+      color: var(--text-gray);
+      font-size: clamp(0.9rem, 2.5vw, 1.25rem);
+      margin-top: 1rem;
+      max-width: 500px;
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+    }
+
+    .scroll-arrow {
+      position: absolute;
+      bottom: 2rem;
+      z-index: 1;
+      animation: bounce 2s ease-in-out infinite;
+    }
+    .scroll-arrow svg {
+      width: 32px;
+      height: 32px;
+      stroke: var(--text-gray);
+      fill: none;
+      stroke-width: 2;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(10px); }
+    }
+
+    /* ===== SECTIONS COMMON ===== */
+    section {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 5rem 1.5rem;
+    }
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .section-title {
+      font-size: clamp(1.5rem, 4vw, 2.25rem);
+      font-weight: 900;
+      margin-bottom: 1rem;
+    }
+    .section-sub {
+      color: var(--text-gray);
+      font-size: clamp(0.9rem, 2vw, 1.1rem);
+      line-height: 1.7;
+      max-width: 600px;
+    }
+
+    /* ===== ABOUT ===== */
+    .features {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+      margin-top: 2.5rem;
+    }
+    @media (min-width: 640px) {
+      .features { grid-template-columns: 1fr 1fr; }
+    }
+
+    .feature {
+      border-left: 4px solid var(--bull-green);
+      padding: 1.25rem 1.5rem;
+      background: rgba(255,255,255,0.03);
+      border-radius: 0 8px 8px 0;
+      transition: box-shadow 0.3s ease;
+    }
+    .feature:hover {
+      box-shadow: 0 0 20px rgba(0,200,83,0.15);
+    }
+    .feature h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+    .feature p {
+      color: var(--text-gray);
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    /* ===== WAITLIST ===== */
+    .waitlist {
+      text-align: center;
+    }
+    .waitlist .section-sub {
+      margin: 0 auto 2rem;
+    }
+
+    .form-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-width: 440px;
+      margin: 0 auto;
+    }
+    @media (min-width: 640px) {
+      .form-wrap {
+        flex-direction: row;
+      }
+    }
+
+    .form-wrap input[type="email"] {
+      flex: 1;
+      padding: 0.875rem 1rem;
+      font-family: var(--font);
+      font-size: 1rem;
+      background: #141414;
+      border: 1px solid rgba(0,200,83,0.4);
+      border-radius: 8px;
+      color: var(--text-white);
+      outline: none;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .form-wrap input[type="email"]:focus {
+      border-color: var(--bull-green);
+      box-shadow: 0 0 12px rgba(0,200,83,0.25);
+    }
+    .form-wrap input[type="email"]::placeholder {
+      color: #555;
+    }
+
+    .btn {
+      padding: 0.875rem 2rem;
+      font-family: var(--font);
+      font-size: 1rem;
+      font-weight: 700;
+      background: var(--bull-green);
+      color: var(--text-white);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: box-shadow 0.3s, background 0.3s;
+      white-space: nowrap;
+    }
+    .btn:hover {
+      background: var(--glow-green);
+      box-shadow: 0 0 24px rgba(0,230,118,0.4);
+    }
+
+    .form-success {
+      display: none;
+      color: var(--bull-green);
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .form-success.show {
+      display: block;
+    }
+
+    /* ===== SOCIALS ===== */
+    .socials {
+      text-align: center;
+      padding-top: 3rem;
+      padding-bottom: 3rem;
+    }
+
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 2rem;
+    }
+
+    .social-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
+      border: 1px solid rgba(0,200,83,0.3);
+      border-radius: 50%;
+      transition: border-color 0.3s, box-shadow 0.3s;
+      text-decoration: none;
+    }
+    .social-link:hover {
+      border-color: var(--bull-green);
+      box-shadow: 0 0 16px rgba(0,200,83,0.35);
+    }
+    .social-link svg {
+      width: 22px;
+      height: 22px;
+      fill: var(--text-white);
+      transition: fill 0.3s;
+    }
+    .social-link:hover svg {
+      fill: var(--glow-green);
+    }
+
+    .social-handle {
+      margin-top: 1.25rem;
+      color: var(--bull-green);
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 2px;
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      color: #555;
+      font-size: 0.8rem;
+      position: relative;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <script src="config.js"></script>
+
+  <!-- Particles -->
+  <div class="particles" aria-hidden="true">
+    <div class="particle" style="left:8%;width:5px;height:5px;--p-opacity:0.25;animation-duration:11s;animation-delay:0s;box-shadow:0 0 6px var(--bull-green)"></div>
+    <div class="particle" style="left:20%;width:3px;height:3px;--p-opacity:0.2;animation-duration:14s;animation-delay:2s;box-shadow:0 0 4px var(--bull-green)"></div>
+    <div class="particle" style="left:35%;width:6px;height:6px;--p-opacity:0.3;animation-duration:9s;animation-delay:1s;box-shadow:0 0 8px var(--bull-green)"></div>
+    <div class="particle" style="left:50%;width:4px;height:4px;--p-opacity:0.2;animation-duration:13s;animation-delay:4s;box-shadow:0 0 5px var(--bull-green)"></div>
+    <div class="particle" style="left:65%;width:7px;height:7px;--p-opacity:0.18;animation-duration:10s;animation-delay:0.5s;box-shadow:0 0 9px var(--bull-green)"></div>
+    <div class="particle" style="left:78%;width:4px;height:4px;--p-opacity:0.25;animation-duration:12s;animation-delay:3s;box-shadow:0 0 5px var(--bull-green)"></div>
+    <div class="particle" style="left:90%;width:5px;height:5px;--p-opacity:0.22;animation-duration:15s;animation-delay:1.5s;box-shadow:0 0 6px var(--bull-green)"></div>
+    <div class="particle" style="left:42%;width:3px;height:3px;--p-opacity:0.2;animation-duration:11s;animation-delay:5s;box-shadow:0 0 4px var(--bull-green)"></div>
+    <div class="particle" style="left:55%;width:8px;height:8px;--p-opacity:0.15;animation-duration:16s;animation-delay:2.5s;box-shadow:0 0 10px var(--bull-green)"></div>
+    <div class="particle" style="left:12%;width:4px;height:4px;--p-opacity:0.2;animation-duration:13s;animation-delay:6s;box-shadow:0 0 5px var(--bull-green)"></div>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <h1 class="brand">MarketStructureLab</h1>
+    <p class="tagline">Professional TradingView indicators built around market structure, liquidity, and volume analysis.</p>
+    <a href="#about" class="scroll-arrow" aria-label="Scroll down">
+      <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </a>
+  </div>
+
+  <!-- About -->
+  <section id="about">
+    <div class="fade-in">
+      <h2 class="section-title">What We Build</h2>
+      <p class="section-sub">Indicators designed for traders who want to understand the market — not just follow signals. Built on Pine Script v6, anti-repaint, one-click alerts.</p>
+    </div>
+    <div class="features fade-in">
+      <div class="feature">
+        <h3>Market Structure</h3>
+        <p>Trend detection, swing levels, and support/resistance zones.</p>
+      </div>
+      <div class="feature">
+        <h3>Liquidity Analysis</h3>
+        <p>Liquidation zones, volume structure, and order flow insights.</p>
+      </div>
+      <div class="feature">
+        <h3>Signal Grading</h3>
+        <p>Scoring system that filters noise and ranks trade quality.</p>
+      </div>
+      <div class="feature">
+        <h3>TradingView Native</h3>
+        <p>Pine Script v6, real-time alerts, works on any chart and timeframe.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Waitlist -->
+  <section class="waitlist">
+    <div class="fade-in">
+      <h2 class="section-title">More Market Insights Coming Soon</h2>
+      <p class="section-sub">Join the waitlist to be first to know about new products and updates.</p>
+      <form id="waitlist-form" class="form-wrap" method="POST">
+        <input type="email" name="email" placeholder="your@email.com" required>
+        <button type="submit" class="btn">Subscribe</button>
+      </form>
+      <p id="form-success" class="form-success">You're in! We'll keep you posted.</p>
+    </div>
+  </section>
+
+  <!-- Socials -->
+  <section class="socials">
+    <div class="fade-in">
+      <h2 class="section-title">Follow Us</h2>
+      <div class="social-links">
+        <!-- TradingView -->
+        <a href="https://www.tradingview.com/u/MarketStructureLab/" target="_blank" rel="noopener" class="social-link" aria-label="TradingView">
+          <svg viewBox="0 0 24 24"><path d="M3 3h6v18H3V3zm8 6h6v12h-6V9zm8-4h2v16h-2V5z"/></svg>
+        </a>
+        <!-- Instagram -->
+        <a href="https://www.instagram.com/marketstructurelabcom" target="_blank" rel="noopener" class="social-link" aria-label="Instagram">
+          <svg viewBox="0 0 24 24"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>
+        </a>
+        <!-- TikTok -->
+        <a href="https://www.tiktok.com/@marketstructurelab" target="_blank" rel="noopener" class="social-link" aria-label="TikTok">
+          <svg viewBox="0 0 24 24"><path d="M16.6 5.82s.51.5 0 0A4.278 4.278 0 0 1 15.54 3h-3.09v12.4a2.592 2.592 0 0 1-2.59 2.5c-1.42 0-2.6-1.16-2.6-2.6 0-1.72 1.66-3.01 3.37-2.48V9.66c-3.45-.46-6.47 2.22-6.47 5.64 0 3.33 2.76 5.7 5.69 5.7 3.14 0 5.69-2.55 5.69-5.7V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3s-1.88.09-3.24-1.48z"/></svg>
+        </a>
+        <!-- Twitter / X -->
+        <a href="https://x.com/MarketstrLab" target="_blank" rel="noopener" class="social-link" aria-label="Twitter">
+          <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </a>
+        <!-- Facebook -->
+        <a href="https://www.facebook.com/marketstructurelab" target="_blank" rel="noopener" class="social-link" aria-label="Facebook">
+          <svg viewBox="0 0 24 24"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/></svg>
+        </a>
+      </div>
+      <p class="social-handle">@MarketStructureLab</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>&copy; 2026 MarketStructureLab</footer>
+
+  <script>
+    // Scroll fade-in
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // Formspree AJAX submit (ID loaded from config.js)
+    const form = document.getElementById('waitlist-form');
+    const success = document.getElementById('form-success');
+    const formAction = `https://formspree.io/f/${FORMSPREE_ID}`;
+    form.setAttribute('action', formAction);
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = new FormData(form);
+      try {
+        const res = await fetch(formAction, {
+          method: 'POST',
+          body: data,
+          headers: { 'Accept': 'application/json' }
+        });
+        if (res.ok) {
+          form.style.display = 'none';
+          success.classList.add('show');
+        }
+      } catch (_) {
+        form.submit();
+      }
+    });
+  </script>
+
+</body>
+</html>
