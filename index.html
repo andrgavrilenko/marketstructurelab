@@ -313,8 +313,6 @@
   </style>
 </head>
 <body>
-  <script src="config.js"></script>
-
   <!-- Particles -->
   <div class="particles" aria-hidden="true">
     <div class="particle" style="left:8%;width:5px;height:5px;--p-opacity:0.25;animation-duration:11s;animation-delay:0s;box-shadow:0 0 6px var(--bull-green)"></div>
@@ -417,11 +415,10 @@
     }, { threshold: 0.15 });
     document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
-    // Formspree AJAX submit (ID loaded from config.js)
+    // Formspree AJAX submit
     const form = document.getElementById('waitlist-form');
     const success = document.getElementById('form-success');
-    const formAction = `https://formspree.io/f/${FORMSPREE_ID}`;
-    form.setAttribute('action', formAction);
+    const formAction = 'https://formspree.io/f/xlgolaab';
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const data = new FormData(form);
