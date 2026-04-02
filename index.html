@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <!-- Google Analytics -->
@@ -334,6 +334,37 @@
       letter-spacing: 2px;
     }
 
+    /* ===== LANG TOGGLE ===== */
+    .lang-toggle {
+      position: fixed;
+      top: 1.25rem;
+      right: 1.25rem;
+      z-index: 100;
+      background: rgba(20,20,20,0.85);
+      border: 1px solid rgba(0,200,83,0.3);
+      border-radius: 20px;
+      padding: 0.3rem;
+      display: flex;
+      gap: 0;
+      backdrop-filter: blur(8px);
+    }
+    .lang-toggle button {
+      font-family: var(--font);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.35rem 0.75rem;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-gray);
+      transition: background 0.3s, color 0.3s;
+    }
+    .lang-toggle button.active {
+      background: var(--bull-green);
+      color: var(--text-white);
+    }
+
     /* ===== FOOTER ===== */
     footer {
       text-align: center;
@@ -346,6 +377,12 @@
   </style>
 </head>
 <body>
+  <!-- Lang toggle -->
+  <div class="lang-toggle">
+    <button id="lang-ru" class="active">RU</button>
+    <button id="lang-en">EN</button>
+  </div>
+
   <!-- Particles -->
   <div class="particles" aria-hidden="true">
     <div class="particle" style="left:8%;width:5px;height:5px;--p-opacity:0.25;animation-duration:11s;animation-delay:0s;box-shadow:0 0 6px var(--bull-green)"></div>
@@ -363,7 +400,7 @@
   <!-- Hero -->
   <div class="hero">
     <h1 class="brand">MarketStructureLab</h1>
-    <p class="tagline">Professional TradingView indicators built around market structure, liquidity, and volume analysis.</p>
+    <p class="tagline" data-i18n="tagline">Профессиональные индикаторы TradingView для анализа структуры рынка, ликвидности и объёмов.</p>
     <a href="#about" class="scroll-arrow" aria-label="Scroll down">
       <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
     </a>
@@ -372,25 +409,25 @@
   <!-- About -->
   <section id="about">
     <div class="fade-in">
-      <h2 class="section-title">What we build</h2>
-      <p class="section-sub">Indicators designed for traders who want to understand the market — not just follow signals. Built on Pine Script v6, anti-repaint, one-click alerts.</p>
+      <h2 class="section-title" data-i18n="about_title">Что мы создаём</h2>
+      <p class="section-sub" data-i18n="about_sub">Индикаторы для трейдеров, которые хотят понимать рынок — а не просто следовать сигналам. Pine Script v6, без перерисовки, алерты в один клик.</p>
     </div>
     <div class="features fade-in">
       <div class="feature">
-        <h3>Market structure</h3>
-        <p>Trend detection, swing levels, and support/resistance zones.</p>
+        <h3 data-i18n="f1_title">Структура рынка</h3>
+        <p data-i18n="f1_desc">Определение тренда, свинг-уровни, зоны поддержки и сопротивления.</p>
       </div>
       <div class="feature">
-        <h3>Liquidity analysis</h3>
-        <p>Liquidation zones, volume structure, and order flow insights.</p>
+        <h3 data-i18n="f2_title">Анализ ликвидности</h3>
+        <p data-i18n="f2_desc">Зоны ликвидаций, структура объёмов, поток ордеров.</p>
       </div>
       <div class="feature">
-        <h3>Signal grading</h3>
-        <p>Scoring system that filters noise and ranks trade quality.</p>
+        <h3 data-i18n="f3_title">Оценка сигналов</h3>
+        <p data-i18n="f3_desc">Система скоринга, которая фильтрует шум и ранжирует качество сделок.</p>
       </div>
       <div class="feature">
-        <h3>TradingView native</h3>
-        <p>Pine Script v6, real-time alerts, works on any chart and timeframe.</p>
+        <h3 data-i18n="f4_title">Нативный TradingView</h3>
+        <p data-i18n="f4_desc">Pine Script v6, алерты в реальном времени, работает на любом графике и таймфрейме.</p>
       </div>
     </div>
   </section>
@@ -398,20 +435,20 @@
   <!-- Waitlist -->
   <section class="waitlist">
     <div class="fade-in">
-      <h2 class="section-title">More market insights coming soon</h2>
-      <p class="section-sub">Join the waitlist to be first to know about new products and updates.</p>
+      <h2 class="section-title" data-i18n="wl_title">Больше аналитики рынка — скоро</h2>
+      <p class="section-sub" data-i18n="wl_sub">Подпишитесь на список ожидания, чтобы первыми узнать о новых продуктах и обновлениях.</p>
       <form id="waitlist-form" class="form-wrap" method="POST">
         <input type="email" name="email" placeholder="your@email.com" required>
-        <button type="submit" class="btn">Subscribe</button>
+        <button type="submit" class="btn" data-i18n="wl_btn">Подписаться</button>
       </form>
-      <p id="form-success" class="form-success">You're in! We'll keep you posted.</p>
+      <p id="form-success" class="form-success" data-i18n="wl_ok">Готово! Мы будем держать вас в курсе.</p>
     </div>
   </section>
 
   <!-- Socials -->
   <section class="socials">
     <div class="fade-in">
-      <h2 class="section-title">Follow us</h2>
+      <h2 class="section-title" data-i18n="social_title">Мы в соцсетях</h2>
       <div class="social-links">
         <!-- TradingView -->
         <a href="https://www.tradingview.com/u/MarketStructureLab/" target="_blank" rel="noopener" class="social-link" aria-label="TradingView">
@@ -469,6 +506,54 @@
         form.submit();
       }
     });
+
+    // i18n
+    const translations = {
+      en: {
+        tagline: 'Professional TradingView indicators built around market structure, liquidity, and volume analysis.',
+        about_title: 'What we build',
+        about_sub: 'Indicators designed for traders who want to understand the market — not just follow signals. Pine Script v6, anti-repaint, one-click alerts.',
+        f1_title: 'Market structure', f1_desc: 'Trend detection, swing levels, and support/resistance zones.',
+        f2_title: 'Liquidity analysis', f2_desc: 'Liquidation zones, volume structure, and order flow insights.',
+        f3_title: 'Signal grading', f3_desc: 'Scoring system that filters noise and ranks trade quality.',
+        f4_title: 'TradingView native', f4_desc: 'Pine Script v6, real-time alerts, works on any chart and timeframe.',
+        wl_title: 'More market insights coming soon',
+        wl_sub: 'Join the waitlist to be first to know about new products and updates.',
+        wl_btn: 'Subscribe', wl_ok: "You're in! We'll keep you posted.",
+        social_title: 'Follow us'
+      },
+      ru: {
+        tagline: 'Профессиональные индикаторы TradingView для анализа структуры рынка, ликвидности и объёмов.',
+        about_title: 'Что мы создаём',
+        about_sub: 'Индикаторы для трейдеров, которые хотят понимать рынок — а не просто следовать сигналам. Pine Script v6, без перерисовки, алерты в один клик.',
+        f1_title: 'Структура рынка', f1_desc: 'Определение тренда, свинг-уровни, зоны поддержки и сопротивления.',
+        f2_title: 'Анализ ликвидности', f2_desc: 'Зоны ликвидаций, структура объёмов, поток ордеров.',
+        f3_title: 'Оценка сигналов', f3_desc: 'Система скоринга, которая фильтрует шум и ранжирует качество сделок.',
+        f4_title: 'Нативный TradingView', f4_desc: 'Pine Script v6, алерты в реальном времени, работает на любом графике и таймфрейме.',
+        wl_title: 'Больше аналитики рынка — скоро',
+        wl_sub: 'Подпишитесь на список ожидания, чтобы первыми узнать о новых продуктах и обновлениях.',
+        wl_btn: 'Подписаться', wl_ok: 'Готово! Мы будем держать вас в курсе.',
+        social_title: 'Мы в соцсетях'
+      }
+    };
+
+    function setLang(lang) {
+      document.documentElement.lang = lang;
+      localStorage.setItem('lang', lang);
+      document.getElementById('lang-ru').classList.toggle('active', lang === 'ru');
+      document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+      const t = translations[lang];
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.dataset.i18n;
+        if (t[key]) el.textContent = t[key];
+      });
+    }
+
+    document.getElementById('lang-ru').addEventListener('click', () => setLang('ru'));
+    document.getElementById('lang-en').addEventListener('click', () => setLang('en'));
+
+    const savedLang = localStorage.getItem('lang');
+    if (savedLang && savedLang !== 'ru') setLang(savedLang);
 
     // Track social link clicks
     document.querySelectorAll('.social-link').forEach(link => {
