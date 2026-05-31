@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MSL Profit Management System, руководство пользователя</title>
+<style>
+:root {
+  --bull: #10b981;
+  --bear: #e11d48;
+  --neutral: #64748b;
+  --text: #e2e8f0;
+  --text-dim: #94a3b8;
+  --bg: #0f172a;
+  --card: #1e293b;
+  --accent: #38bdf8;
+}
+* { box-sizing: border-box; }
+body {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  max-width: 900px;
+  margin: 32px auto;
+  padding: 0 24px 64px;
+  color: var(--text);
+  line-height: 1.6;
+  background: var(--bg);
+}
+h1 {
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 12px;
+  margin-top: 0;
+}
+h2 {
+  color: #f1f5f9;
+  margin-top: 40px;
+  border-left: 4px solid var(--bull);
+  padding-left: 12px;
+}
+h3 {
+  color: #cbd5e1;
+  margin-top: 28px;
+}
+code {
+  background: var(--card);
+  padding: 2px 7px;
+  border-radius: 4px;
+  color: var(--accent);
+  font-size: 0.92em;
+}
+pre {
+  background: #020617;
+  color: #e2e8f0;
+  padding: 14px 18px;
+  border-radius: 6px;
+  overflow-x: auto;
+  border: 1px solid var(--card);
+}
+table {
+  border-collapse: collapse;
+  margin: 14px 0;
+  width: 100%;
+}
+th, td {
+  border: 1px solid var(--card);
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+th {
+  background: var(--card);
+  color: #f1f5f9;
+}
+td code { background: #020617; }
+ul, ol { padding-left: 22px; }
+li { margin-bottom: 4px; }
+.bull { color: var(--bull); font-weight: 600; }
+.bear { color: var(--bear); font-weight: 600; }
+.neutral { color: var(--neutral); }
+.note {
+  background: var(--card);
+  border-left: 3px solid var(--accent);
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin: 16px 0;
+  color: var(--text-dim);
+}
+.warn {
+  background: #422006;
+  border-left: 3px solid #f59e0b;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin: 16px 0;
+  color: #fde68a;
+}
+hr { border: none; border-top: 1px solid var(--card); margin: 32px 0; }
+
+.sandbox {
+  background: #020617;
+  border: 1px solid var(--card);
+  border-radius: 10px;
+  padding: 18px;
+  margin: 20px 0 32px;
+}
+.sandbox svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 6px;
+}
+.sandbox-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  align-items: center;
+  margin-top: 14px;
+}
+.sandbox-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1 1 280px;
+  min-width: 240px;
+}
+.sandbox-row > label {
+  font-size: 0.9em;
+  color: #f1f5f9;
+  white-space: nowrap;
+  font-weight: 500;
+}
+.sandbox-row input[type="range"] {
+  flex: 1;
+  accent-color: var(--bull);
+  height: 4px;
+  cursor: pointer;
+}
+.sandbox-row select {
+  background: #0f172a;
+  color: var(--text);
+  border: 1px solid var(--card);
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  cursor: pointer;
+}
+.sandbox-value {
+  font-family: ui-monospace, monospace;
+  color: #fbbf24;
+  min-width: 56px;
+  text-align: right;
+  font-size: 0.9em;
+}
+.sandbox-readout {
+  display: flex;
+  gap: 22px;
+  font-family: ui-monospace, monospace;
+  font-size: 0.85em;
+  margin-top: 12px;
+  flex-wrap: wrap;
+  color: var(--text-dim);
+}
+.sandbox-readout span.metric {
+  color: var(--text);
+}
+.sandbox-readout .pos { color: var(--bull); font-weight: 600; }
+.sandbox-readout .neg { color: var(--bear); font-weight: 600; }
+.sandbox-caption {
+  color: var(--text-dim);
+  font-size: 0.85em;
+  margin-top: 10px;
+  font-style: italic;
+  line-height: 1.5;
+}
+</style>
+</head>
+<body>
+
+<h1>MSL Profit Management System</h1>
+<p>Флагманский трендовый инструмент от <strong>MarketStructureLab</strong>. Комбинирует адаптивную скользящую среднюю (на выбор 8 типов), волатильную огибающую <strong>Dynamic Trail</strong> на базе ATR и встроенную <strong>PRO таблицу</strong>, которая считает направление, последний сигнал и плавающий профит в реальном времени. Создан как универсальный движок управления сделкой: вход, удержание, выход.</p>
+
+<h2>1. Что делает индикатор</h2>
+<p>Profit Management System решает не одну, а три задачи одновременно, и в этом его главная ценность по сравнению с обычным MA-сигнальщиком.</p>
+<ol>
+  <li><strong>Определяет направление тренда.</strong> Адаптивная скользящая средняя выбранного типа (EMA по умолчанию, есть также VAR, ZLEMA, TSF и ещё четыре) даёт чистую базовую линию текущего тренда.</li>
+  <li><strong>Строит трейлинг-стоп.</strong> Dynamic Trail это огибающая на расстоянии <code>ATR Multiplier × ATR</code> от скользящей средней. Поддержка прилипает к минимуму на восходящем тренде, сопротивление прилипает к максимуму на нисходящем. Это готовый трейлинг-стоп без ручной настройки.</li>
+  <li><strong>Считает результат сделки.</strong> PRO таблица в углу графика показывает: текущее направление, последний сигнал (LONG / SHORT / WAIT), плавающий профит в процентах от точки входа, сколько баров прошло с момента сигнала, выбранный тип MA, контекст (цена выше или ниже трейла).</li>
+</ol>
+<p>Сигналы LONG и SHORT появляются, когда базовая линия пересекает Dynamic Trail. По умолчанию вход подтверждается закрытием бара плюс позицией цены относительно трейла, что отсекает большую часть ложных импульсов.</p>
+
+<h2>2. Рекомендуемые активы, рынки, фазы, таймфреймы, ограничения</h2>
+
+<h3>Активы и рынки</h3>
+<p>Индикатор универсальный по классу актива. Подходит для:</p>
+<ul>
+  <li><strong>Крипта</strong>: BTC, ETH, ликвидные альты (SOL, BNB, LINK).</li>
+  <li><strong>Фьючерсы</strong>: ES, NQ, CL, GC, BTC-perp.</li>
+  <li><strong>FX мажоры</strong>: EURUSD, GBPUSD, USDJPY и кроссы.</li>
+  <li><strong>Акции большой капитализации</strong>: AAPL, MSFT, NVDA, индексы S&P / Nasdaq.</li>
+</ul>
+<p>Работает хуже на низколиквидных альткоинах, акциях с большими гэпами и инструментах с прерывистыми сессиями.</p>
+
+<h3>Фазы рынка</h3>
+<ul>
+  <li><strong>Чистые трендовые движения</strong>: индикатор показывает классику. Базовая линия идёт под углом, Dynamic Trail удерживает позицию широкой полосой, цена не возвращается через трейл до самого разворота. Это режим, где система зарабатывает больше всего.</li>
+  <li><strong>Импульс с откатами</strong>: коррекции внутри тренда часто не достают до Dynamic Trail. Сигнал LONG или SHORT остаётся в силе, плавающий профит на таблице временно проседает, но позиция жива.</li>
+  <li><strong>Боковик низкой волатильности</strong>: цена многократно пересекает MA и Dynamic Trail без направления. В этой фазе сигналы переключаются туда-сюда, профит на каждом не вырастает. Лучше отойти и подождать выхода из диапазона.</li>
+  <li><strong>Постновостные взрывы</strong>: ATR резко расширяется, Dynamic Trail отходит далеко от цены. Это нормально, цель именно в том, чтобы не быть выбитым волатильностью.</li>
+</ul>
+
+<h3>Таймфреймы</h3>
+<table>
+  <thead><tr><th>ТФ</th><th>Применение</th></tr></thead>
+  <tbody>
+    <tr><td>H1</td><td>Минимальный рабочий таймфрейм. Активная свинг-торговля, 1-3 сделки в неделю на ликвидных парах.</td></tr>
+    <tr><td>H4</td><td>Сбалансированный режим. Чистые трендовые волны, хороший баланс частоты и качества сигналов.</td></tr>
+    <tr><td>D1</td><td>Свинг и позиционная торговля. Главный режим для определения общего байеса и удержания крупных позиций.</td></tr>
+    <tr><td>W1</td><td>Долгосрочная картина. Сигналы редкие, но мощные. Используется как фильтр для нижних таймфреймов.</td></tr>
+  </tbody>
+</table>
+
+<div class="warn">
+<strong>Ограничения, о которых надо знать.</strong>
+<ul>
+  <li>Индикатор работает <strong>по факту, не предсказывает</strong>. Все сигналы появляются после реального пересечения, а не до него.</li>
+  <li><strong>Trail запаздывает</strong> в моменты резких разворотов. Это плата за защиту от шума. При экстремальных свечах часть профита оставляется в рынке.</li>
+  <li>На таймфреймах <strong>ниже H1</strong> Dynamic Trail слишком чувствителен к шуму. Сигналов будет много, качество ниже.</li>
+  <li>PRO таблица показывает <strong>плавающий профит, а не реализованный</strong>. Цифра живая и меняется до закрытия позиции. Это индикатор контекста, а не отчёт по сделке.</li>
+  <li><code>Bars Since</code> считается в барах текущего таймфрейма, при смене ТФ счётчик пересчитывается.</li>
+  <li>Сигналы фиксируются только при <code>barstate.isconfirmed</code>, если оставлен дефолт <code>Confirm Signals On Bar Close = true</code>. Внутрибарные крестики не превратятся в сигнал, если до закрытия свечи цена вернётся обратно.</li>
+</ul>
+</div>
+
+<h2>3. Механика взаимодействия с индикатором</h2>
+
+<p>Базовый порядок работы такой.</p>
+
+<ol>
+  <li><strong>Смотри на цвет линий и заливки.</strong> Зелёная заливка между MA и трейлом значит восходящий тренд, красная значит нисходящий. Цвет переключается ровно в момент сигнала.</li>
+  <li><strong>Жди стрелку LONG или SHORT.</strong> Зелёный треугольник снизу с подписью LONG это сигнал на покупку. Красный треугольник сверху с подписью SHORT это сигнал на продажу. Стрелки появляются только при подтверждённом закрытии бара.</li>
+  <li><strong>Используй Dynamic Trail как трейлинг-стоп.</strong> После входа держи позицию, пока цена не закроется по другую сторону от трейла. Закрытие свечи через трейл это сигнал на выход.</li>
+  <li><strong>Сверяйся с PRO таблицей.</strong> Шесть строк показывают полный контекст сделки: куда смотрит байес, какой был последний сигнал, сколько процентов плавающего профита, сколько баров прошло.</li>
+</ol>
+
+<h3>Типовые сценарии использования</h3>
+<ul>
+  <li><strong>Свинг-вход по сигналу.</strong> Ждёшь стрелку LONG или SHORT, открываешь позицию по close сигнального бара или по открытию следующего. Стоп ставишь по Dynamic Trail или чуть дальше за ним. Цели по структуре или партиальным фиксам.</li>
+  <li><strong>Трейлинг по факту.</strong> Вошёл по своему сетапу, не по сигналу индикатора. Используй Dynamic Trail как объективный трейлинг-стоп. Закрытие через трейл, это выход.</li>
+  <li><strong>Фильтр режима для других стратегий.</strong> Открываешь сделки от своей системы только когда Bias в таблице совпадает с направлением входа. Лонги только при <code>Bias = LONG</code>, шорты только при <code>Bias = SHORT</code>.</li>
+  <li><strong>Мониторинг открытых сделок.</strong> Если уже в позиции, PRO таблица показывает плавающий профит и сколько баров позиция живёт. Удобно для решения "пора фиксировать или дать поработать".</li>
+  <li><strong>Multi-timeframe конфлюэнс.</strong> Сигнал на H4, подтверждение направления на D1. Если на D1 <code>Bias = LONG</code> и на H4 пришла стрелка LONG, это сильная конструкция.</li>
+</ul>
+
+<h3>Когда игнорировать сигнал</h3>
+<ul>
+  <li>Если за последние 10-15 баров уже было 2-3 переключения, рынок в боковике. Все сигналы в этой фазе будут шумом.</li>
+  <li>Если в PRO таблице <code>Context = At Trail</code> и трейл лежит почти горизонтально, тренда нет. Жди явного направления.</li>
+  <li>Если сигнал пришёл прямо на новостях, ATR ещё не успел расшириться. Можно пропустить или ждать второй сигнал.</li>
+  <li>Если ты на M15 или ниже, индикатор не подходит. Минимальный осмысленный ТФ это H1.</li>
+</ul>
+
+<div class="note">
+Главное правило: <strong>Dynamic Trail это трейлинг-стоп, не сигнал на разворот</strong>. Когда цена закрывается обратно через трейл, это означает "выйди из позиции", а не "разворачивайся в обратную сторону". Разворот ждёт следующего сигнала LONG или SHORT.
+</div>
+
+<h2>4. Обозначения на графике, цвета, значки</h2>
+
+<h3>Moving Average (базовая линия тренда)</h3>
+<p>Толстая линия на ценовом графике. Цвет зависит от текущего тренда: <span class="bull">зелёный</span>, когда MA выше Dynamic Trail (восходящий режим), <span class="bear">красный</span>, когда MA ниже трейла. Тип расчёта выбирается в настройках, по умолчанию EMA. Это <strong>скелет</strong> индикатора, от неё считаются все сигналы.</p>
+
+<h3>Dynamic Trail (динамический трейл)</h3>
+<p>Вторая линия того же цвета, что и MA. На расстоянии <code>ATR Multiplier × ATR</code> от скользящей средней. В восходящем тренде идёт <strong>под</strong> MA как поддержка, в нисходящем идёт <strong>над</strong> MA как сопротивление. Ключевое свойство: <strong>прилипает к экстремумам</strong>. В лонге трейл может только расти или стоять на месте, не падать. В шорте может только падать или стоять, не расти. Это даёт классическое поведение трейлинг-стопа.</p>
+
+<h3>Trend Fill (заливка тренда)</h3>
+<p>Полупрозрачная заливка между MA и Dynamic Trail. <span class="bull">Зелёная</span> в восходящем тренде, <span class="bear">красная</span> в нисходящем. Чем шире заливка, тем выше волатильность (ATR). Сужение заливки сигнализирует о падении волатильности и возможном выходе из тренда.</p>
+
+<h3>LONG / SHORT стрелки</h3>
+<p>В момент сигнала появляются треугольники с подписями:</p>
+<ul>
+  <li><span class="bull"><strong>Зелёный треугольник вверх</strong></span> со словом <strong>LONG</strong> снизу. Появляется на расстоянии <code>Signal Arrow Offset ATR</code> ниже Dynamic Trail. Подпись LONG ещё ниже на <code>Signal Text Offset ATR</code>. Сигнал на покупку.</li>
+  <li><span class="bear"><strong>Красный треугольник вниз</strong></span> со словом <strong>SHORT</strong> сверху. Появляется выше Dynamic Trail на тех же относительных расстояниях. Сигнал на продажу.</li>
+</ul>
+<p>Размер отступов настраивается, чтобы стрелки не липли к свечам и не уходили далеко за экран на низковолатильных активах.</p>
+
+<h3>PRO таблица (сводка состояния)</h3>
+<p>Таблица в выбранном углу графика, 7 строк включая шапку. Каждая ячейка цветная и отражает текущее состояние сделки и рынка.</p>
+<table>
+  <thead><tr><th>Строка</th><th>Что показывает</th><th>Возможные значения</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Bias</strong></td>
+      <td>Текущее направление тренда по положению MA относительно трейла</td>
+      <td><span class="bull">LONG</span>, <span class="bear">SHORT</span></td>
+    </tr>
+    <tr>
+      <td><strong>Last Signal</strong></td>
+      <td>Последний подтверждённый сигнал</td>
+      <td><span class="bull">LONG</span>, <span class="bear">SHORT</span>, WAIT (если сигналов ещё не было)</td>
+    </tr>
+    <tr>
+      <td><strong>Profit %</strong></td>
+      <td>Плавающий профит от цены последнего сигнала. Цвет ячейки зелёный при плюсе, красный при минусе</td>
+      <td>Число с двумя знаками, например <code>+3.24%</code>, или <code>n/a</code>, если сигналов не было</td>
+    </tr>
+    <tr>
+      <td><strong>Bars Since</strong></td>
+      <td>Сколько баров прошло с момента последнего сигнала</td>
+      <td>Число баров, или <code>n/a</code></td>
+    </tr>
+    <tr>
+      <td><strong>MA Type</strong></td>
+      <td>Какой тип скользящей средней сейчас активен</td>
+      <td>SMA, EMA, WMA, TMA, VAR, WWMA, ZLEMA, TSF</td>
+    </tr>
+    <tr>
+      <td><strong>Context</strong></td>
+      <td>Где сейчас цена относительно трейла</td>
+      <td><span class="bull">Above Trail</span>, <span class="bear">Below Trail</span>, At Trail</td>
+    </tr>
+  </tbody>
+</table>
+<p>Цветовое кодирование: бычье состояние в зелёных тонах, медвежье в красных, нейтральное в тёмно-сером. Плюсовой профит подсвечивается насыщенным зелёным, минусовой насыщенным красным.</p>
+
+<h2>Песочница, поиграй сам</h2>
+<p>Прежде чем читать таблицы настроек, подвигай ползунки на синтетическом графике ниже. Это самый быстрый способ почувствовать, как параметры меняют поведение индикатора. Свечи фиксированные, индикатор реальный, пересчитывается прямо в браузере.</p>
+
+<h3>Песочница 1, множитель ATR и трейлинг-стоп</h3>
+<div class="sandbox" id="sb1">
+  <svg id="sb1-svg" viewBox="0 0 920 300" role="img" aria-label="Демо длинной позиции с трейлинг-стопом по ATR"></svg>
+  <div class="sandbox-controls">
+    <div class="sandbox-row">
+      <label for="sb1-mult">Множитель ATR</label>
+      <input id="sb1-mult" type="range" min="1" max="6" step="0.1" value="3">
+      <span class="sandbox-value" id="sb1-mult-val">3.0</span>
+    </div>
+    <div class="sandbox-readout">
+      <span><span class="metric">Стоп от входа:</span> <span id="sb1-stop-pct">2.40%</span></span>
+      <span><span class="metric">Сделка:</span> <span id="sb1-open-r">+0.00R</span></span>
+    </div>
+  </div>
+  <p class="sandbox-caption">Больший множитель ставит начальный стоп дальше под входом, увеличивает 1R, цели 1R / 2R / 3R расходятся шире. Меньший множитель поджимает стоп и сводит цели ближе, профит в R растёт быстрее, но риск выноса по шуму выше. Зелёный трейлинг-стоп подтягивается под ценой и никогда не ослабляется.</p>
+</div>
+
+<h3>Песочница 2, тип и длина скользящей средней</h3>
+<div class="sandbox" id="sb2">
+  <svg id="sb2-svg" viewBox="0 0 920 300" role="img" aria-label="Демо разных типов скользящей средней"></svg>
+  <div class="sandbox-controls">
+    <div class="sandbox-row">
+      <label for="sb2-type">Тип MA</label>
+      <select id="sb2-type">
+        <option value="SMA">SMA</option>
+        <option value="EMA" selected>EMA</option>
+        <option value="WMA">WMA</option>
+        <option value="TMA">TMA</option>
+        <option value="VAR">VAR</option>
+        <option value="WWMA">WWMA</option>
+        <option value="ZLEMA">ZLEMA</option>
+        <option value="TSF">TSF</option>
+      </select>
+    </div>
+    <div class="sandbox-row">
+      <label for="sb2-len">Длина MA</label>
+      <input id="sb2-len" type="range" min="5" max="30" step="1" value="10">
+      <span class="sandbox-value" id="sb2-len-val">10</span>
+    </div>
+    <div class="sandbox-readout">
+      <span><span class="metric">Среднее отставание:</span> <span id="sb2-lag">0.00%</span></span>
+      <span><span class="metric">Текущее значение MA:</span> <span id="sb2-ma">0.00</span></span>
+    </div>
+  </div>
+  <p class="sandbox-caption">SMA и TMA самые медленные и гладкие, хороши для долгосрочного фильтра. EMA, WMA и WWMA сбалансированные. VAR ускоряется на сильных движениях. ZLEMA и TSF опережают цену и подходят, когда классическая EMA запаздывает, но добавляют шум на разворотах.</p>
+</div>
+
+<div class="note">
+<strong>Что в этих песочницах ненастоящее.</strong> Свечи синтетические, генерируются из фиксированного зерна для одинаковой картинки у всех. Цена не открытие торгов, это иллюстрация. Логика расчёта MA, ATR и трейла настоящая, та же что в Pine файле индикатора. Цель песочниц показать как параметры влияют на форму линий и стопов, не предсказать рынок.
+</div>
+
+<h2>5. Настройки и сигналы</h2>
+
+<h3>Настройки</h3>
+
+<p><strong>Группа Core Calculations (ядро расчёта).</strong></p>
+<table>
+  <thead><tr><th>Параметр</th><th>Default</th><th>Что делает</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>Source</code></td>
+      <td>hl2</td>
+      <td>Источник цены для расчёта MA. <code>hl2</code> = (high + low) / 2 даёт более ровную линию, чем close. Альтернатива <code>close</code> для классики.</td>
+    </tr>
+    <tr>
+      <td><code>ATR Length</code></td>
+      <td>10</td>
+      <td>Длина окна для расчёта ATR. Чем больше, тем стабильнее ширина трейла, но тем медленнее адаптация под смену волатильности.</td>
+    </tr>
+    <tr>
+      <td><code>ATR Multiplier</code></td>
+      <td>3.0</td>
+      <td>Множитель ATR для ширины трейла. <strong>Главный регулятор частоты сигналов</strong>. Меньше = трейл уже = сигналов больше и они шумнее. Больше = трейл шире = сигналов меньше, но они качественнее.</td>
+    </tr>
+    <tr>
+      <td><code>Moving Average Type</code></td>
+      <td>EMA</td>
+      <td>Тип скользящей средней. Подробности ниже в таблице типов MA.</td>
+    </tr>
+    <tr>
+      <td><code>Moving Average Length</code></td>
+      <td>10</td>
+      <td>Длина MA. Чем больше, тем медленнее и плавнее. Чем меньше, тем реактивнее и шумнее.</td>
+    </tr>
+    <tr>
+      <td><code>Use Built-in ATR?</code></td>
+      <td>true</td>
+      <td>Если включено, используется встроенный <code>ta.atr()</code>. Если выключено, считается SMA от True Range. Встроенный ATR использует RMA, что даёт более плавную ширину трейла.</td>
+    </tr>
+    <tr>
+      <td><code>Normalize ATR?</code></td>
+      <td>false</td>
+      <td>Если включить, ATR делится на close. Полезно для сравнения активов разной ценовой шкалы (акции по 5 долларов и BTC по 60000). Для обычного использования оставить выключенным.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Восемь типов скользящей средней.</strong> Чтобы не гадать, какой тип выбрать, держи в голове такую шпаргалку.</p>
+<table>
+  <thead><tr><th>Тип</th><th>Характер</th><th>Когда выбирать</th></tr></thead>
+  <tbody>
+    <tr><td><code>SMA</code></td><td>Простое среднее. Медленная, плавная.</td><td>Классика, медленный свинг, фильтр главного тренда на D1.</td></tr>
+    <tr><td><code>EMA</code></td><td>Экспоненциальная. Реактивнее SMA. <strong>Дефолт</strong>.</td><td>Универсальный выбор. Сбалансированная скорость для H4 и D1.</td></tr>
+    <tr><td><code>WMA</code></td><td>Линейный вес, последние бары важнее.</td><td>Когда нужна реакция чуть быстрее EMA.</td></tr>
+    <tr><td><code>TMA</code></td><td>Двойное SMA, очень плавная.</td><td>Долгосрочные позиции на W1, фильтр главного байеса.</td></tr>
+    <tr><td><code>VAR</code></td><td>Adaptive variable MA, ускоряется на сильных движениях.</td><td>Импульсные рынки, постновостные движения, крипта в трендовой фазе.</td></tr>
+    <tr><td><code>WWMA</code></td><td>Wilder smoothing, похожа на медленную EMA.</td><td>Конструктивно очень близка к ATR. Хороша как когерентная пара к встроенному ATR.</td></tr>
+    <tr><td><code>ZLEMA</code></td><td>Zero-lag EMA, компенсирует запаздывание.</td><td>Когда классическая EMA слишком запаздывает. Чуть больше шума, но раньше входы.</td></tr>
+    <tr><td><code>TSF</code></td><td>Linear regression forecast, прогнозная.</td><td>Гладкие трендовые рынки. Опережает классику, но плохо переносит резкие развороты.</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Группа Signal Engine (фильтры сигналов).</strong></p>
+<table>
+  <thead><tr><th>Параметр</th><th>Default</th><th>Что делает</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>Confirm Signals On Bar Close</code></td>
+      <td>true</td>
+      <td>Сигнал засчитывается только при закрытии свечи. Если выключить, стрелки начнут появляться внутри бара и пропадать, если цена откатит. Оставить включённым.</td>
+    </tr>
+    <tr>
+      <td><code>Require Price Confirmation</code></td>
+      <td>true</td>
+      <td>Дополнительный фильтр: для LONG <code>close</code> должен быть выше Dynamic Trail, для SHORT ниже. Отсекает крестики, когда MA пересекла трейл, но цена осталась по другую сторону. Оставить включённым.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Группа Visuals (визуальные настройки).</strong></p>
+<table>
+  <thead><tr><th>Параметр</th><th>Default</th><th>Что делает</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>Show Moving Average</code></td>
+      <td>on</td>
+      <td>Показывать ли линию MA. Можно скрыть, если хочется минимализма и работы только по трейлу.</td>
+    </tr>
+    <tr>
+      <td><code>Show LONG/SHORT Signals</code></td>
+      <td>on</td>
+      <td>Показывать ли треугольники-стрелки с подписями.</td>
+    </tr>
+    <tr>
+      <td><code>Show Trend Fill</code></td>
+      <td>on</td>
+      <td>Показывать ли цветную заливку между MA и трейлом. Если выключить, останутся две линии без заливки.</td>
+    </tr>
+    <tr>
+      <td><code>Signal Arrow Offset ATR</code></td>
+      <td>0.6</td>
+      <td>Отступ стрелки от Dynamic Trail в долях ATR. Чем больше, тем дальше стрелка от линии.</td>
+    </tr>
+    <tr>
+      <td><code>Signal Text Offset ATR</code></td>
+      <td>1.5</td>
+      <td>Отступ подписи LONG / SHORT от стрелки в долях ATR. Текст всегда дальше от трейла, чем сам треугольник.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Группа PRO Table (панель состояния).</strong></p>
+<table>
+  <thead><tr><th>Параметр</th><th>Default</th><th>Что делает</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>Show PRO Table</code></td>
+      <td>on</td>
+      <td>Показывать ли сводную таблицу с Bias, Last Signal, Profit %, Bars Since, MA Type, Context.</td>
+    </tr>
+    <tr>
+      <td><code>Table Position</code></td>
+      <td>Top Right</td>
+      <td>Куда поместить таблицу: Top Right, Top Left, Bottom Right, Bottom Left. Удобно подвинуть, если она перекрывает важные элементы графика.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Сигналы</h3>
+
+<p>Индикатор предоставляет шесть событий через <code>alertcondition</code>. Их можно вешать как алерты в TradingView и получать пуши на телефон или email.</p>
+
+<table>
+  <thead><tr><th>Сигнал</th><th>Условие</th><th>Что значит</th><th>Alert title</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><span class="bull">LONG Signal</span></td>
+      <td>Базовая линия пересекла Dynamic Trail вверх, бар подтверждён, цена выше трейла</td>
+      <td>Основной сигнал на покупку. Зелёный треугольник на графике.</td>
+      <td><code>LONG Signal</code></td>
+    </tr>
+    <tr>
+      <td><span class="bear">SHORT Signal</span></td>
+      <td>Базовая линия пересекла Dynamic Trail вниз, бар подтверждён, цена ниже трейла</td>
+      <td>Основной сигнал на продажу. Красный треугольник на графике.</td>
+      <td><code>SHORT Signal</code></td>
+    </tr>
+    <tr>
+      <td>Trail Cross</td>
+      <td>Любое пересечение MA и Dynamic Trail в обе стороны (без фильтров подтверждения)</td>
+      <td>Сырое событие пересечения. Может произойти раньше подтверждённого LONG / SHORT.</td>
+      <td><code>Trail Cross</code></td>
+    </tr>
+    <tr>
+      <td>Price / Trail Cross</td>
+      <td>Цена (close) пересекла Dynamic Trail в любую сторону</td>
+      <td>Цена закрылась по другую сторону трейла. Полезно как раннее предупреждение об окончании позиции.</td>
+      <td><code>Price / Trail Cross</code></td>
+    </tr>
+    <tr>
+      <td><span class="bull">Price Above Trail</span></td>
+      <td>Цена пересекла Dynamic Trail вверх</td>
+      <td>Только восходящие пересечения цены через трейл. Удобно для выходов из коротких позиций.</td>
+      <td><code>Price Above Trail</code></td>
+    </tr>
+    <tr>
+      <td><span class="bear">Price Below Trail</span></td>
+      <td>Цена пересекла Dynamic Trail вниз</td>
+      <td>Только нисходящие пересечения цены через трейл. Удобно для выходов из длинных позиций.</td>
+      <td><code>Price Below Trail</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="note">
+Совет: при настройке alert выбирай опцию <strong>Once Per Bar Close</strong>, чтобы события фиксировались только по закрытию свечи. Внутрибаровые алерты часто оказываются ложными из-за того, что цена может вернуться обратно за время бара.
+</div>
+
+<h3>Связка сигналов с PRO таблицей</h3>
+<ul>
+  <li><strong>Bias = LONG</strong> + только что пришёл <strong>LONG Signal</strong> = идеальный сетап на покупку. Направление и сигнал согласованы.</li>
+  <li><strong>Bias = SHORT</strong> + <strong>SHORT Signal</strong> = идеальный сетап на продажу.</li>
+  <li><strong>Profit % &gt; 0</strong> и растёт = тренд развивается, можно подтягивать стоп вручную выше трейла, чтобы зафиксировать часть профита.</li>
+  <li><strong>Profit % &lt; 0</strong> и не растёт несколько баров после сигнала = сигнал, скорее всего, был ложным. Выходи по любому удобному стопу, не жди обратного пересечения.</li>
+  <li><strong>Context = At Trail</strong> в течение 5+ баров = трейл лежит горизонтально, тренда нет. Избегай новых входов.</li>
+</ul>
+
+<h2>6. Глоссарий простыми словами</h2>
+<p>Если какой-то термин выше напугал, найди его здесь. Без матана и заумных формулировок, как для друга за чашкой кофе.</p>
+<table>
+  <thead><tr><th>Термин</th><th>Что это на самом деле</th></tr></thead>
+  <tbody>
+    <tr><td><strong>LONG (лонг)</strong></td><td>Ставка на рост. Купил дешевле, рассчитываешь продать дороже. Зелёная стрелка на графике.</td></tr>
+    <tr><td><strong>SHORT (шорт)</strong></td><td>Ставка на падение. Биржа даёт продать актив, которого у тебя нет, чтобы потом выкупить дешевле и забрать разницу. Красная стрелка.</td></tr>
+    <tr><td><strong>Bias (байес)</strong></td><td>Не пугайся слова, это не из теории вероятностей. Здесь просто "куда сейчас перевешивает тренд": вверх или вниз.</td></tr>
+    <tr><td><strong>ATR</strong></td><td>Средний размах свечи за последнее время. Грубо говоря, "насколько сильно актив сейчас гуляет". Большой ATR = большие свечи = шире стоп.</td></tr>
+    <tr><td><strong>Трейлинг-стоп</strong></td><td>Стоп-лосс, который ползёт за ценой в сторону прибыли и никогда не откатывает обратно. В нашем индикаторе это и есть Dynamic Trail (зелёная или красная линия).</td></tr>
+    <tr><td><strong>Стоп-лосс</strong></td><td>Цена, на которой ты заранее согласен закрыться в минус, чтобы не потерять ещё больше. Ставится сразу при входе, не "потом".</td></tr>
+    <tr><td><strong>Тейк-профит</strong></td><td>Цена, где фиксируешь прибыль и выходишь.</td></tr>
+    <tr><td><strong>R (риск)</strong></td><td>Расстояние от входа до стопа, выраженное в деньгах. <strong>1R = сколько ты теряешь, если выбьет по стопу.</strong> Прибыль удобно мерить в R: +2R значит заработал вдвое больше, чем рисковал. Эту букву ты видел в Песочнице 1.</td></tr>
+    <tr><td><strong>Свинг</strong></td><td>Сделка на несколько дней или недель, а не внутри одного дня. Основной режим этого индикатора.</td></tr>
+    <tr><td><strong>Таймфрейм (ТФ)</strong></td><td>Сколько времени рисуется одна свеча. H1 = часовая, H4 = четырёхчасовая, D1 = дневная, W1 = недельная.</td></tr>
+    <tr><td><strong>Ликвидность</strong></td><td>Насколько легко купить и продать без проскальзывания цены. Высокая у крупных монет (BTC, ETH) и больших акций, низкая у мелких альтов.</td></tr>
+    <tr><td><strong>Плавающий профит</strong></td><td>Прибыль по ещё не закрытой сделке. Цифра живая, скачет каждую секунду. Пока не закрыл позицию, это не деньги в кармане.</td></tr>
+  </tbody>
+</table>
+
+<h2>7. Риск и размер позиции, это важнее сигналов</h2>
+<p>Индикатор называется Profit <strong>Management</strong> System не случайно. Запомни простую пропорцию: сигнал это примерно 20% результата, а управление риском все 80%. Новички сливают депозит не потому, что стрелки плохие. Они сливают, потому что заходят на все деньги и не ставят стоп. Этот раздел спасает от слива сильнее, чем любой сигнал.</p>
+
+<h3>Правило 1%</h3>
+<p>На одну сделку рискуй не больше <strong>1-2% депозита</strong>. Это значит: если цену выбьет по стопу, ты теряешь 1-2%, а не половину счёта. Звучит скучно, но именно это держит тебя в игре достаточно долго, чтобы тренды успели принести прибыль.</p>
+
+<h3>Как посчитать размер позиции, на пальцах</h3>
+<p>Пример с круглыми числами.</p>
+<table>
+  <thead><tr><th>Шаг</th><th>Значение</th></tr></thead>
+  <tbody>
+    <tr><td>Твой депозит</td><td>1000 $</td></tr>
+    <tr><td>Готов потерять на сделке (1%)</td><td>10 $</td></tr>
+    <tr><td>Вход по сигналу LONG</td><td>100 $ за единицу</td></tr>
+    <tr><td>Стоп по Dynamic Trail</td><td>95 $ (на 5 $ ниже входа)</td></tr>
+    <tr><td>Расстояние до стопа = 1R</td><td>5 $ на единицу</td></tr>
+    <tr><td><strong>Объём позиции</strong></td><td>10 $ риска / 5 $ до стопа = <strong>2 единицы</strong></td></tr>
+  </tbody>
+</table>
+<p>Формула простая: <code>объём = (сколько готов потерять) / (расстояние от входа до стопа)</code>. Если цену выбьет по стопу, ты теряешь ровно 10 $, ни центом больше. Если сделка дойдёт до цели 2R, заработаешь 20 $.</p>
+
+<div class="note">
+<strong>Связь с Песочницей 1.</strong> Помнишь, как множитель ATR двигал стоп дальше или ближе? Вот прямое следствие: <strong>шире стоп = меньше объём</strong> при том же риске в деньгах, но и шум реже выбивает. <strong>Узкий стоп = больше объём</strong> и быстрее растёт профит в R, но чаще ловишь случайный вынос. Песочница ровно это и показывала, теперь понятно зачем.
+</div>
+
+<div class="warn">
+<strong>Самое опасное действие на бирже.</strong> Никогда не двигай стоп в сторону убытка, чтобы "пересидеть просадку". Мысль "ещё чуть-чуть и развернётся" убила больше депозитов, чем любой обвал рынка. Стоп выставлен один раз и не двигается против тебя. Двигать его можно только в плюс, вслед за трейлом.
+</div>
+
+<h2>8. Частые ошибки новичка, чего НЕ делать</h2>
+<p>Собрал сюда грабли, на которые наступают почти все. Если ловишь себя на одном из пунктов, остановись.</p>
+<ul>
+  <li><strong>Входить на весь депозит.</strong> Одна свеча против тебя, и счёта больше нет. Всегда считай объём от риска (раздел 7), а не "на сколько хватит денег".</li>
+  <li><strong>Ловить каждую стрелку, особенно на M5 и M15.</strong> На младших таймфреймах стрелок десятки в день, и большинство это шум. Жди H1 и выше. Меньше сделок, больше качества.</li>
+  <li><strong>Торговать в боковике.</strong> Если за последние 10-15 баров цвет переключался 2-3 раза, рынок пилит. Индикатор в этой фазе выдаёт ложные сигналы один за другим. Отойди и подожди явного тренда.</li>
+  <li><strong>Двигать стоп против себя.</strong> Повторю из раздела 7, потому что это критично: стоп не двигается в сторону убытка. Никогда.</li>
+  <li><strong>Воспринимать выход по трейлу как разворот.</strong> Пробили трейл = просто <strong>выйди</strong> из позиции. Заходить в обратную сторону можно только когда придёт новая стрелка LONG или SHORT.</li>
+  <li><strong>Отыгрываться после убытка.</strong> Проиграл сделку, на эмоциях удвоил объём, чтобы "вернуть своё". Это тильт, и он сливает счёт быстрее всего. Убыток это нормальная часть работы. Следующая сделка такого же размера, как обычно.</li>
+  <li><strong>Крутить настройки после каждого минуса.</strong> Поменял тип MA, не зашло, поменял ещё раз, ищешь "грааль". Грааля нет. Оставь EMA по умолчанию и дай системе серию из 20-30 сделок, прежде чем судить.</li>
+  <li><strong>Путать плавающий профит с деньгами.</strong> +5% в PRO таблице это не прибыль в кармане, пока ты не закрыл позицию. Рынок легко забирает нереализованный плюс обратно.</li>
+</ul>
+
+<div class="warn">
+<strong>Disclaimer.</strong> Этот индикатор это аналитический инструмент, не финансовая рекомендация. Используй его как один из входов в свою торговую систему и всегда сочетай с собственным риск-менеджментом и анализом рынка. Любые решения о сделках остаются за тобой.
+</div>
+
+<script>
+(function () {
+  const W = 920, H = 300;
+  const PAD = { l: 10, r: 56, t: 18, b: 18 };
+  const UP = "#10b981";
+  const DOWN = "#e11d48";
+  const FG = "#e2e8f0";
+  const MUTED = "rgba(226,232,240,0.25)";
+
+  function mulberry32(seed) {
+    let a = seed >>> 0;
+    return function () {
+      a = (a + 0x6d2b79f5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  const WAVES = [
+    { amp: 1.4, freq: 0.85, phase: 0 },
+    { amp: 2.2, freq: 0.42, phase: 1.1 },
+    { amp: 3.0, freq: 0.20, phase: 2.0 },
+    { amp: 4.0, freq: 0.10, phase: 0.5 }
+  ];
+
+  function makeSeries(seed, n) {
+    const rnd = mulberry32(seed);
+    const out = [];
+    let prev = null;
+    for (let i = 0; i < n; i++) {
+      let wiggle = 0;
+      for (const w of WAVES) wiggle += Math.sin(i * w.freq + w.phase) * w.amp;
+      const close = 100 + 0.06 * i + wiggle + (rnd() - 0.5) * 0.5;
+      const o = prev === null ? close : prev;
+      const h = Math.max(o, close) + rnd() * 0.8;
+      const l = Math.min(o, close) - rnd() * 0.8;
+      out.push({ o: o, h: h, l: l, c: close });
+      prev = close;
+    }
+    return out;
+  }
+
+  function sma(values, len) {
+    const out = new Array(values.length).fill(NaN);
+    for (let i = len - 1; i < values.length; i++) {
+      let sum = 0, ok = true;
+      for (let j = i - len + 1; j <= i; j++) {
+        if (isNaN(values[j])) { ok = false; break; }
+        sum += values[j];
+      }
+      if (ok) out[i] = sum / len;
+    }
+    return out;
+  }
+
+  function ema(values, len) {
+    const out = new Array(values.length).fill(NaN);
+    const k = 2 / (len + 1);
+    let prev = values[0];
+    for (let i = 0; i < values.length; i++) {
+      prev = i === 0 ? values[0] : values[i] * k + prev * (1 - k);
+      out[i] = prev;
+    }
+    return out;
+  }
+
+  function wma(values, len) {
+    const out = new Array(values.length).fill(NaN);
+    const wsum = (len * (len + 1)) / 2;
+    for (let i = len - 1; i < values.length; i++) {
+      let acc = 0;
+      for (let j = 0; j < len; j++) acc += values[i - j] * (len - j);
+      out[i] = acc / wsum;
+    }
+    return out;
+  }
+
+  function tma(values, len) {
+    const f = Math.max(1, Math.ceil(len / 2));
+    const s = Math.max(1, Math.floor(len / 2) + 1);
+    return sma(sma(values, f), s);
+  }
+
+  function wwma(values, len) {
+    const out = new Array(values.length).fill(NaN);
+    const w = 1 / len;
+    let prev = values[0];
+    for (let i = 0; i < values.length; i++) {
+      prev = i === 0 ? values[0] : values[i] * w + prev * (1 - w);
+      out[i] = prev;
+    }
+    return out;
+  }
+
+  function varMa(values, len) {
+    const out = new Array(values.length).fill(NaN);
+    const k = 2 / (len + 1);
+    let prev = values[0];
+    for (let i = 0; i < values.length; i++) {
+      if (i === 0) { out[i] = values[0]; prev = values[0]; continue; }
+      let up = 0, down = 0;
+      for (let j = i - len + 1; j <= i; j++) {
+        if (j <= 0) continue;
+        const d = values[j] - values[j - 1];
+        if (d > 0) up += d; else if (d < 0) down -= d;
+      }
+      const denom = up + down;
+      const mom = denom === 0 ? 0 : (up - down) / denom;
+      const a = k * Math.abs(mom);
+      prev = a * values[i] + (1 - a) * prev;
+      out[i] = prev;
+    }
+    return out;
+  }
+
+  function zlema(values, len) {
+    const lag = len % 2 === 0 ? Math.floor(len / 2) : Math.floor((len - 1) / 2);
+    const adj = values.map((v, i) => v + (v - (values[i - lag] != null ? values[i - lag] : v)));
+    return ema(adj, len);
+  }
+
+  function linreg(values, len) {
+    const out = new Array(values.length).fill(NaN);
+    for (let i = len - 1; i < values.length; i++) {
+      let sx = 0, sy = 0, sxx = 0, sxy = 0;
+      for (let j = 0; j < len; j++) {
+        const x = j;
+        const y = values[i - (len - 1 - j)];
+        sx += x; sy += y; sxx += x * x; sxy += x * y;
+      }
+      const n = len;
+      const slope = (n * sxy - sx * sy) / (n * sxx - sx * sx);
+      const intercept = (sy - slope * sx) / n;
+      out[i] = intercept + slope * (len - 1);
+    }
+    return out;
+  }
+
+  function tsf(values, len) {
+    const lr = linreg(values, len);
+    const out = new Array(values.length).fill(NaN);
+    for (let i = 1; i < values.length; i++) {
+      if (!isNaN(lr[i]) && !isNaN(lr[i - 1])) out[i] = lr[i] + (lr[i] - lr[i - 1]);
+    }
+    return out;
+  }
+
+  function maOf(type, values, len) {
+    switch (type) {
+      case "SMA":   return sma(values, len);
+      case "WMA":   return wma(values, len);
+      case "TMA":   return tma(values, len);
+      case "VAR":   return varMa(values, len);
+      case "WWMA":  return wwma(values, len);
+      case "ZLEMA": return zlema(values, len);
+      case "TSF":   return tsf(values, len);
+      default:      return ema(values, len);
+    }
+  }
+
+  function atrSeries(candles, len) {
+    const tr = new Array(candles.length);
+    for (let i = 0; i < candles.length; i++) {
+      if (i === 0) { tr[i] = candles[i].h - candles[i].l; continue; }
+      const pc = candles[i - 1].c;
+      tr[i] = Math.max(
+        candles[i].h - candles[i].l,
+        Math.abs(candles[i].h - pc),
+        Math.abs(candles[i].l - pc)
+      );
+    }
+    const out = new Array(candles.length).fill(NaN);
+    let prev = 0;
+    for (let i = 0; i < tr.length; i++) {
+      if (i < len) {
+        prev += tr[i];
+        if (i === len - 1) { prev /= len; out[i] = prev; }
+      } else {
+        prev = (prev * (len - 1) + tr[i]) / len;
+        out[i] = prev;
+      }
+    }
+    return out;
+  }
+
+  const CANDLES = makeSeries(4, 120);
+  const HL2 = CANDLES.map(c => (c.h + c.l) / 2);
+  const ATR_LEN = 10;
+  const MA_LEN_FIXED = 10;
+  const ATR = atrSeries(CANDLES, ATR_LEN);
+  const MA_FIXED = ema(HL2, MA_LEN_FIXED);
+  const ENTRY_I = 46;
+  const ENTRY = CANDLES[ENTRY_I].c;
+  const LAST_I = CANDLES.length - 1;
+  const LAST_PRICE = CANDLES[LAST_I].c;
+
+  function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+
+  function renderSandbox1(mult) {
+    const atrEntry = ATR[ENTRY_I];
+    const initStop = ENTRY - mult * atrEntry;
+    const r = ENTRY - initStop;
+    const targets = [1, 2, 3].map(k => ({ k, price: ENTRY + k * r }));
+    const trail = new Array(CANDLES.length).fill(NaN);
+    let prev = initStop;
+    for (let i = ENTRY_I; i < CANDLES.length; i++) {
+      const a = isNaN(ATR[i]) ? atrEntry : ATR[i];
+      prev = Math.max(prev, CANDLES[i].c - mult * a);
+      trail[i] = prev;
+    }
+    const openR = (LAST_PRICE - ENTRY) / r;
+
+    let lo = Infinity, hi = -Infinity;
+    for (const c of CANDLES) { if (c.l < lo) lo = c.l; if (c.h > hi) hi = c.h; }
+    if (initStop < lo) lo = initStop;
+    if (targets[targets.length - 1].price > hi) hi = targets[targets.length - 1].price;
+    lo -= 1; hi += 1;
+
+    const xOf = i => PAD.l + (i / (CANDLES.length - 1)) * (W - PAD.l - PAD.r);
+    const yOf = v => PAD.t + (1 - (v - lo) / (hi - lo)) * (H - PAD.t - PAD.b);
+    const cw = Math.max(1.5, ((W - PAD.l - PAD.r) / CANDLES.length) * 0.6);
+
+    let svg = "";
+    for (const t of targets) {
+      const y = yOf(t.price);
+      svg += `<line x1="${PAD.l}" x2="${W - PAD.r}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${UP}" stroke-opacity="0.45" stroke-dasharray="5 5"/>`;
+      svg += `<text x="${W - PAD.r + 4}" y="${(y + 4).toFixed(1)}" fill="${UP}" font-size="11" font-family="ui-monospace, monospace">${t.k}R</text>`;
+    }
+    const yE = yOf(ENTRY);
+    svg += `<line x1="${PAD.l}" x2="${W - PAD.r}" y1="${yE.toFixed(1)}" y2="${yE.toFixed(1)}" stroke="#ffffff" stroke-opacity="0.55" stroke-dasharray="2 4"/>`;
+    svg += `<text x="${W - PAD.r + 4}" y="${(yE + 4).toFixed(1)}" fill="#ffffff" fill-opacity="0.7" font-size="11" font-family="ui-monospace, monospace">вход</text>`;
+    const yS = yOf(initStop);
+    svg += `<line x1="${PAD.l}" x2="${W - PAD.r}" y1="${yS.toFixed(1)}" y2="${yS.toFixed(1)}" stroke="${DOWN}" stroke-opacity="0.55" stroke-dasharray="5 5"/>`;
+    svg += `<text x="${W - PAD.r + 4}" y="${(yS + 4).toFixed(1)}" fill="${DOWN}" font-size="11" font-family="ui-monospace, monospace">стоп</text>`;
+
+    for (let i = 0; i < CANDLES.length; i++) {
+      const c = CANDLES[i];
+      const up = c.c >= c.o;
+      const col = up ? UP : DOWN;
+      const x = xOf(i);
+      svg += `<line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${yOf(c.h).toFixed(1)}" y2="${yOf(c.l).toFixed(1)}" stroke="${col}" stroke-opacity="0.5"/>`;
+      const yTop = yOf(Math.max(c.o, c.c));
+      const bh = Math.max(1, Math.abs(yOf(c.o) - yOf(c.c)));
+      svg += `<rect x="${(x - cw / 2).toFixed(1)}" y="${yTop.toFixed(1)}" width="${cw.toFixed(1)}" height="${bh.toFixed(1)}" fill="${col}" fill-opacity="0.65"/>`;
+    }
+
+    const maPts = MA_FIXED.map((v, i) => isNaN(v) ? null : `${xOf(i).toFixed(1)},${yOf(v).toFixed(1)}`).filter(Boolean).join(" ");
+    svg += `<polyline points="${maPts}" fill="none" stroke="#ffffff" stroke-width="1" stroke-opacity="0.25"/>`;
+    const trailPts = trail.map((v, i) => isNaN(v) ? null : `${xOf(i).toFixed(1)},${yOf(v).toFixed(1)}`).filter(Boolean).join(" ");
+    svg += `<polyline points="${trailPts}" fill="none" stroke="${UP}" stroke-width="2" stroke-opacity="0.9"/>`;
+    svg += `<circle cx="${xOf(ENTRY_I).toFixed(1)}" cy="${yE.toFixed(1)}" r="5" fill="${UP}" stroke="#142119" stroke-width="1.5"/>`;
+
+    document.getElementById("sb1-svg").innerHTML = svg;
+    document.getElementById("sb1-mult-val").textContent = mult.toFixed(1);
+    document.getElementById("sb1-stop-pct").textContent = ((r / ENTRY) * 100).toFixed(2) + "%";
+    const openEl = document.getElementById("sb1-open-r");
+    const sign = openR >= 0 ? "+" : "";
+    openEl.textContent = sign + openR.toFixed(2) + "R";
+    openEl.className = openR >= 0 ? "pos" : "neg";
+  }
+
+  function renderSandbox2(type, len) {
+    const ma = maOf(type, HL2, len);
+
+    let lo = Infinity, hi = -Infinity;
+    for (const c of CANDLES) { if (c.l < lo) lo = c.l; if (c.h > hi) hi = c.h; }
+    for (const v of ma) { if (!isNaN(v)) { if (v < lo) lo = v; if (v > hi) hi = v; } }
+    lo -= 1; hi += 1;
+
+    const xOf = i => PAD.l + (i / (CANDLES.length - 1)) * (W - PAD.l - PAD.r);
+    const yOf = v => PAD.t + (1 - (v - lo) / (hi - lo)) * (H - PAD.t - PAD.b);
+    const cw = Math.max(1.5, ((W - PAD.l - PAD.r) / CANDLES.length) * 0.6);
+
+    let svg = "";
+    for (let i = 0; i < CANDLES.length; i++) {
+      const c = CANDLES[i];
+      const up = c.c >= c.o;
+      const col = up ? UP : DOWN;
+      const x = xOf(i);
+      svg += `<line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${yOf(c.h).toFixed(1)}" y2="${yOf(c.l).toFixed(1)}" stroke="${col}" stroke-opacity="0.45"/>`;
+      const yTop = yOf(Math.max(c.o, c.c));
+      const bh = Math.max(1, Math.abs(yOf(c.o) - yOf(c.c)));
+      svg += `<rect x="${(x - cw / 2).toFixed(1)}" y="${yTop.toFixed(1)}" width="${cw.toFixed(1)}" height="${bh.toFixed(1)}" fill="${col}" fill-opacity="0.55"/>`;
+    }
+    const maPts = ma.map((v, i) => isNaN(v) ? null : `${xOf(i).toFixed(1)},${yOf(v).toFixed(1)}`).filter(Boolean).join(" ");
+    svg += `<polyline points="${maPts}" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-opacity="0.95"/>`;
+    svg += `<text x="${W - PAD.r + 4}" y="${(yOf(ma[ma.length - 1]) + 4).toFixed(1)}" fill="#38bdf8" font-size="11" font-family="ui-monospace, monospace">${esc(type)}</text>`;
+
+    document.getElementById("sb2-svg").innerHTML = svg;
+    document.getElementById("sb2-len-val").textContent = String(len);
+
+    let sumLag = 0, n = 0;
+    for (let i = 0; i < ma.length; i++) {
+      if (!isNaN(ma[i]) && HL2[i] !== 0) {
+        sumLag += Math.abs(HL2[i] - ma[i]) / HL2[i];
+        n++;
+      }
+    }
+    const avgLag = n === 0 ? 0 : (sumLag / n) * 100;
+    document.getElementById("sb2-lag").textContent = avgLag.toFixed(2) + "%";
+    const last = ma[ma.length - 1];
+    document.getElementById("sb2-ma").textContent = isNaN(last) ? "n/a" : last.toFixed(2);
+  }
+
+  const sb1Mult = document.getElementById("sb1-mult");
+  sb1Mult.addEventListener("input", e => renderSandbox1(parseFloat(e.target.value)));
+  renderSandbox1(parseFloat(sb1Mult.value));
+
+  const sb2Type = document.getElementById("sb2-type");
+  const sb2Len = document.getElementById("sb2-len");
+  const refresh2 = () => renderSandbox2(sb2Type.value, parseInt(sb2Len.value, 10));
+  sb2Type.addEventListener("change", refresh2);
+  sb2Len.addEventListener("input", refresh2);
+  refresh2();
+})();
+</script>
+
+</body>
+</html>
